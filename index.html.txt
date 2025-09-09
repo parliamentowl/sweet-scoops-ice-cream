@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweet Scoops Ice Cream</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <h1 class="logo">🍦 Sweet Scoops</h1>
+                <ul class="nav-menu">
+                    <li><a href="#menu">Menu</a></li>
+                    <li><a href="#survey">Vote for Your Favorite</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Welcome to Sweet Scoops</h2>
+                <p>Handcrafted ice cream made with love and the finest ingredients</p>
+                <a href="#menu" class="cta-button">View Our Menu</a>
+            </div>
+        </section>
+
+        <section id="menu" class="menu-section">
+            <div class="container">
+                <h2 class="section-title">Our Ice Cream Menu</h2>
+                
+                <!-- Normal Flavors -->
+                <div class="menu-category">
+                    <h3 class="category-title">Normal Flavors</h3>
+                    <div class="menu-grid">
+                        <div class="menu-item">
+                            <div class="menu-item-image">🍓</div>
+                            <h3>Strawberry Buttermilk</h3>
+                            <p>Fresh strawberries with tangy buttermilk base</p>
+                            <span class="price">$4.75</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-item-image">🫒</div>
+                            <h3>Sweet Cream & Blackberry Jam</h3>
+                            <p>Rich sweet cream swirled with house-made blackberry jam</p>
+                            <span class="price">$5.25</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-item-image">🍃</div>
+                            <h3>Mint Fudge Brownie</h3>
+                            <p>Cool mint ice cream with chunks of fudgy brownies</p>
+                            <span class="price">$5.00</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-item-image">🍯</div>
+                            <h3>Salted Caramel</h3>
+                            <p>Sweet caramel with a hint of sea salt</p>
+                            <span class="price">$4.75</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-item-image">🍦</div>
+                            <h3>Salty Vanilla</h3>
+                            <p>Classic vanilla elevated with a touch of salt</p>
+                            <span class="price">$4.50</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unusual Flavors -->
+                <div class="menu-category">
+                    <h3 class="category-title">Unusual Flavors</h3>
+                    <div class="menu-grid">
+                        <div class="menu-item unusual">
+                            <div class="menu-item-image">🌲</div>
+                            <h3>Spruce Tips</h3>
+                            <p>Foraged spruce tips create a unique forest flavor</p>
+                            <span class="price">$6.00</span>
+                        </div>
+                        <div class="menu-item unusual">
+                            <div class="menu-item-image">🧀</div>
+                            <h3>Parmesan</h3>
+                            <p>Aged Parmigiano-Reggiano in creamy ice cream</p>
+                            <span class="price">$6.50</span>
+                        </div>
+                        <div class="menu-item unusual">
+                            <div class="menu-item-image">🌿</div>
+                            <h3>Lovage Ginger & Rum Raisin</h3>
+                            <p>Herbaceous lovage with warming ginger and rum-soaked raisins</p>
+                            <span class="price">$6.25</span>
+                        </div>
+                        <div class="menu-item unusual">
+                            <div class="menu-item-image">🍒</div>
+                            <h3>Sour Cherry Lambic</h3>
+                            <p>Tart cherries with notes of Belgian lambic beer</p>
+                            <span class="price">$6.75</span>
+                        </div>
+                        <div class="menu-item unusual">
+                            <div class="menu-item-image">🌺</div>
+                            <h3>Ylang Ylang with Clove & Honeycomb</h3>
+                            <p>Exotic ylang ylang flower with warm clove and honeycomb pieces</p>
+                            <span class="price">$7.00</span>
+                        </div>
+                        <div class="menu-item unusual">
+                            <div class="menu-item-image">☕</div>
+                            <h3>Tiramisu</h3>
+                            <p>Coffee-soaked ladyfingers and mascarpone in ice cream form</p>
+                            <span class="price">$5.75</span>
+                        </div>
+                        <div class="menu-item unusual">
+                            <div class="menu-item-image">⭐</div>
+                            <h3>Star Anise Black Pepper</h3>
+                            <p>Aromatic star anise with a surprising kick of black pepper</p>
+                            <span class="price">$6.50</span>
+                        </div>
+                        <div class="menu-item unusual">
+                            <div class="menu-item-image">🍊</div>
+                            <h3>Orange-Szechuan</h3>
+                            <p>Bright orange with the tingling heat of Szechuan peppercorns</p>
+                            <span class="price">$6.25</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="survey" class="survey-section">
+            <div class="container">
+                <h2 class="section-title">Vote for Your Favorite Ice Cream!</h2>
+                <p class="survey-description">Help us decide which flavors to feature next month by voting for your favorites!</p>
+                
+                <form id="ice-cream-survey" class="survey-form">
+                    <div class="form-group">
+                        <label for="name">Your Name (Optional):</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Select your TOP 3 favorite flavors:</label>
+                        <div class="survey-categories">
+                            <div class="survey-category">
+                                <h4>Normal Flavors</h4>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="favorites" value="Strawberry Buttermilk">
+                                        <span>🍓 Strawberry Buttermilk</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="favorites" value="Sweet Cream & Blackberry Jam">
+                                        <span>🫒 Sweet Cream & Blackberry Jam</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="favorites" value="Mint Fudge Brownie">
+                                        <span>🍃 Mint Fudge Brownie</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="favorites" value="Salted Caramel">
+                                        <span>🍯 Salted Caramel</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="favorites" value="Salty Vanilla">
+                                        <span>🍦 Salty Vanilla</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="survey-category">
+                                <h4>Unusual Flavors</h4>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item unusual">
+                                        <input type="checkbox" name="favorites" value="Spruce Tips">
+                                        <span>🌲 Spruce Tips</span>
+                                    </label>
+                                    <label class="checkbox-item unusual">
+                                        <input type="checkbox" name="favorites" value="Parmesan">
+                                        <span>🧀 Parmesan</span>
+                                    </label>
+                                    <label class="checkbox-item unusual">
+                                        <input type="checkbox" name="favorites" value="Lovage Ginger & Rum Raisin">
+                                        <span>🌿 Lovage Ginger & Rum Raisin</span>
+                                    </label>
+                                    <label class="checkbox-item unusual">
+                                        <input type="checkbox" name="favorites" value="Sour Cherry Lambic">
+                                        <span>🍒 Sour Cherry Lambic</span>
+                                    </label>
+                                    <label class="checkbox-item unusual">
+                                        <input type="checkbox" name="favorites" value="Ylang Ylang with Clove & Honeycomb">
+                                        <span>🌺 Ylang Ylang with Clove & Honeycomb</span>
+                                    </label>
+                                    <label class="checkbox-item unusual">
+                                        <input type="checkbox" name="favorites" value="Tiramisu">
+                                        <span>☕ Tiramisu</span>
+                                    </label>
+                                    <label class="checkbox-item unusual">
+                                        <input type="checkbox" name="favorites" value="Star Anise Black Pepper">
+                                        <span>⭐ Star Anise Black Pepper</span>
+                                    </label>
+                                    <label class="checkbox-item unusual">
+                                        <input type="checkbox" name="favorites" value="Orange-Szechuan">
+                                        <span>🍊 Orange-Szechuan</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="suggestion">Suggest a new flavor:</label>
+                        <textarea id="suggestion" name="suggestion" placeholder="What flavor would you like to see on our menu?"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-button">Submit Vote</button>
+                </form>
+                
+                <div id="survey-results" class="survey-results" style="display: none;">
+                    <h3>Thank you for voting! 🎉</h3>
+                    <p>Your preferences have been recorded. Check back next month to see the results!</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2 class="section-title">About Sweet Scoops</h2>
+                <p>Since 2025, Sweet Scoops has been serving small groups quirky, handcrafted ice cream made from only the most interesting ingredients.</p>
+                <div class="hours">
+                    <h3>Hours</h3>
+                    <p>Saturday: 1:30p - 4:30p</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Sweet Scoops Ice Cream. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
