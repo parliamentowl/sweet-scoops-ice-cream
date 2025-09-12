@@ -67,34 +67,85 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Simulate form submission (in a real app, you'd send this to a server)
-        setTimeout(() => {
-            // Store the ranked votes in localStorage with weighted scoring
-            const votes = JSON.parse(localStorage.getItem('iceCreamRankedVotes') || '{}');
-            
-            // Weighted scoring: 1st choice = 3 points, 2nd choice = 2 points, 3rd choice = 1 point
-            if (firstChoice) {
-                votes[firstChoice] = (votes[firstChoice] || 0) + 3;
-            }
-            if (secondChoice) {
-                votes[secondChoice] = (votes[secondChoice] || 0) + 2;
-            }
-            if (thirdChoice) {
-                votes[thirdChoice] = (votes[thirdChoice] || 0) + 1;
-            }
-            
-            localStorage.setItem('iceCreamRankedVotes', JSON.stringify(votes));
-            
-            // Show success message
-            surveyForm.style.display = 'none';
-            surveyResults.style.display = 'block';
-            
-            // Update results display
-            updateVoteResults(votes);
-            
-            showToast('Thank you for your ranked vote!', 'success');
-        }, 1000);
+        // Submit to Google Sheets and update local storage
+        submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion)
+            .then(() => {
+                // Also store locally for immediate display
+                const votes = JSON.parse(localStorage.getItem('iceCreamRankedVotes') || '{}');
+                
+                // Weighted scoring: 1st choice = 3 points, 2nd choice = 2 points, 3rd choice = 1 point
+                if (firstChoice) {
+                    votes[firstChoice] = (votes[firstChoice] || 0) + 3;
+                }
+                if (secondChoice) {
+                    votes[secondChoice] = (votes[secondChoice] || 0) + 2;
+                }
+                if (thirdChoice) {
+                    votes[thirdChoice] = (votes[thirdChoice] || 0) + 1;
+                }
+                
+                localStorage.setItem('iceCreamRankedVotes', JSON.stringify(votes));
+                
+                // Show success message
+                surveyForm.style.display = 'none';
+                surveyResults.style.display = 'block';
+                
+                // Update results display
+                updateVoteResults(votes);
+                
+                showToast('Thank you for your ranked vote!', 'success');
+            })
+            .catch((error) => {
+                console.error('Error submitting vote:', error);
+                showToast('Vote saved locally, but could not sync to server', 'warning');
+                
+                // Still update local storage as fallback
+                const votes = JSON.parse(localStorage.getItem('iceCreamRankedVotes') || '{}');
+                if (firstChoice) votes[firstChoice] = (votes[firstChoice] || 0) + 3;
+                if (secondChoice) votes[secondChoice] = (votes[secondChoice] || 0) + 2;
+                if (thirdChoice) votes[thirdChoice] = (votes[thirdChoice] || 0) + 1;
+                localStorage.setItem('iceCreamRankedVotes', JSON.stringify(votes));
+                
+                surveyForm.style.display = 'none';
+                surveyResults.style.display = 'block';
+                updateVoteResults(votes);
+            });
     });
+
+    // Google Sheets integration
+    async function submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion) {
+        const SHEET_ID = '1jMl6RoJsN03UI_F1YAZHKpT9TV5V2Z8Cod0mUbOImcc';
+        const API_KEY = 'AIzaSyCXhIbkLSsrug6Xloo4GkcXvREn45NJ9Lw';
+        const RANGE = 'Sheet1!A:F'; // Covers columns A through F
+        
+        const timestamp = new Date().toISOString();
+        const values = [[
+            timestamp,
+            name || 'Anonymous',
+            firstChoice || '',
+            secondChoice || '',
+            thirdChoice || '',
+            suggestion || ''
+        ]];
+        
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                values: values
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Google Sheets API error: ${response.status}`);
+        }
+        
+        return response.json();
+    }
 
     // Toast notification system
     function showToast(message, type = 'info') {
@@ -158,27 +209,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update vote results display
     function updateVoteResults(votes) {
-        const resultsContainer = document.getElementById('survey-results');
+        const resultsDisplay = document.getElementById('results-display');
         
-        // Sort flavors by vote count
+        // Sort flavors by points (vote count in our weighted system)
         const sortedVotes = Object.entries(votes).sort((a, b) => b[1] - a[1]);
         
-        let resultsHTML = `
-            <h3>Thank you for voting! 🎉</h3>
-            <p>Your preferences have been recorded. Here are the current results:</p>
-            <div class="vote-results">
-        `;
+        let resultsHTML = '<div class="vote-results">';
         
-        sortedVotes.forEach(([flavor, count], index) => {
-            const percentage = Math.round((count / Object.values(votes).reduce((a, b) => a + b, 0)) * 100);
+        sortedVotes.slice(0, 6).forEach(([flavor, points], index) => {
+            const totalPoints = Object.values(votes).reduce((a, b) => a + b, 0);
+            const percentage = Math.round((points / totalPoints) * 100);
             const emoji = getFlavorEmoji(flavor);
+            
+            const rankEmojis = ['🥇', '🥈', '🥉'];
+            const rankEmoji = index < 3 ? rankEmojis[index] : `#${index + 1}`;
             
             resultsHTML += `
                 <div class="result-item">
                     <div class="result-header">
-                        <span class="rank">#${index + 1}</span>
+                        <span class="rank">${rankEmoji}</span>
                         <span class="flavor">${emoji} ${flavor}</span>
-                        <span class="votes">${count} votes (${percentage}%)</span>
+                        <span class="points">${points} points</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress" style="width: ${percentage}%"></div>
@@ -188,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         resultsHTML += '</div>';
-        resultsContainer.innerHTML = resultsHTML;
+        resultsDisplay.innerHTML = resultsHTML;
         
         // Add CSS for results display
         if (!document.getElementById('results-styles')) {
@@ -222,9 +273,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     margin: 0 1rem;
                     font-weight: bold;
                 }
-                .votes {
+                .points {
                     color: #666;
                     font-size: 0.9rem;
+                    font-weight: bold;
                 }
                 .progress-bar {
                     background: #f0f0f0;
