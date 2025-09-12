@@ -130,6 +130,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
         
+        console.log('Submitting to Google Sheets:', { url, values });
+        
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -140,11 +142,17 @@ document.addEventListener('DOMContentLoaded', function() {
             })
         });
         
+        console.log('Google Sheets response status:', response.status);
+        
         if (!response.ok) {
-            throw new Error(`Google Sheets API error: ${response.status}`);
+            const errorText = await response.text();
+            console.error('Google Sheets API error:', response.status, errorText);
+            throw new Error(`Google Sheets API error: ${response.status} - ${errorText}`);
         }
         
-        return response.json();
+        const result = await response.json();
+        console.log('Google Sheets success:', result);
+        return result;
     }
 
     // Toast notification system
