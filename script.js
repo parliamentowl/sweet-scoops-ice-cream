@@ -16,18 +16,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Survey form functionality
     const surveyForm = document.getElementById('ice-cream-survey');
     const surveyResults = document.getElementById('survey-results');
-    const checkboxes = document.querySelectorAll('input[name="favorites"]');
+    const firstChoice = document.getElementById('first-choice');
+    const secondChoice = document.getElementById('second-choice');
+    const thirdChoice = document.getElementById('third-choice');
 
-    // Limit checkbox selections to 3
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const checkedBoxes = document.querySelectorAll('input[name="favorites"]:checked');
-            
-            if (checkedBoxes.length > 3) {
-                this.checked = false;
-                showToast('Please select only 3 favorites!', 'warning');
-            }
+    // Prevent duplicate selections
+    function updateSelectOptions() {
+        const selects = [firstChoice, secondChoice, thirdChoice];
+        const selectedValues = selects.map(select => select.value).filter(value => value);
+        
+        selects.forEach(select => {
+            const options = select.querySelectorAll('option');
+            options.forEach(option => {
+                if (option.value && selectedValues.includes(option.value) && option.value !== select.value) {
+                    option.disabled = true;
+                } else {
+                    option.disabled = false;
+                }
+            });
         });
+    }
+
+    // Add event listeners to update options when selections change
+    [firstChoice, secondChoice, thirdChoice].forEach(select => {
+        select.addEventListener('change', updateSelectOptions);
     });
 
     // Handle form submission
@@ -36,25 +48,42 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const formData = new FormData(this);
         const name = formData.get('name') || 'Anonymous';
-        const favorites = formData.getAll('favorites');
+        const firstChoice = formData.get('first-choice');
+        const secondChoice = formData.get('second-choice');
+        const thirdChoice = formData.get('third-choice');
         const suggestion = formData.get('suggestion');
         
-        // Validate that at least one favorite is selected
-        if (favorites.length === 0) {
-            showToast('Please select at least one favorite ice cream!', 'error');
+        // Validate that at least first choice is selected
+        if (!firstChoice) {
+            showToast('Please select at least your first choice!', 'error');
+            return;
+        }
+        
+        // Check for duplicate selections (shouldn't happen with disabled options, but good to double-check)
+        const choices = [firstChoice, secondChoice, thirdChoice].filter(choice => choice);
+        const uniqueChoices = new Set(choices);
+        if (choices.length !== uniqueChoices.size) {
+            showToast('Please select different flavors for each ranking!', 'error');
             return;
         }
         
         // Simulate form submission (in a real app, you'd send this to a server)
         setTimeout(() => {
-            // Store the vote in localStorage for demo purposes
-            const votes = JSON.parse(localStorage.getItem('iceCreamVotes') || '{}');
+            // Store the ranked votes in localStorage with weighted scoring
+            const votes = JSON.parse(localStorage.getItem('iceCreamRankedVotes') || '{}');
             
-            favorites.forEach(flavor => {
-                votes[flavor] = (votes[flavor] || 0) + 1;
-            });
+            // Weighted scoring: 1st choice = 3 points, 2nd choice = 2 points, 3rd choice = 1 point
+            if (firstChoice) {
+                votes[firstChoice] = (votes[firstChoice] || 0) + 3;
+            }
+            if (secondChoice) {
+                votes[secondChoice] = (votes[secondChoice] || 0) + 2;
+            }
+            if (thirdChoice) {
+                votes[thirdChoice] = (votes[thirdChoice] || 0) + 1;
+            }
             
-            localStorage.setItem('iceCreamVotes', JSON.stringify(votes));
+            localStorage.setItem('iceCreamRankedVotes', JSON.stringify(votes));
             
             // Show success message
             surveyForm.style.display = 'none';
@@ -63,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update results display
             updateVoteResults(votes);
             
-            showToast('Thank you for your vote!', 'success');
+            showToast('Thank you for your ranked vote!', 'success');
         }, 1000);
     });
 
