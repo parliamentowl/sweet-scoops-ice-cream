@@ -113,39 +113,63 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
 
-    // Google Apps Script integration
-    async function submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion) {
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsWu8fnt8s1_diZT4sg3SCoVzGDa_EozhAiYNvWNiO9v_h3xFbFAFh9LvMgKvv9lUdtQ/exec';
-        
-        const data = {
-            name: name || 'Anonymous',
-            firstChoice: firstChoice || '',
-            secondChoice: secondChoice || '',
-            thirdChoice: thirdChoice || '',
-            suggestion: suggestion || ''
-        };
-        
-        console.log('Submitting to Apps Script:', data);
-        
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
+    // Google Apps Script integration using form submission method
+    function submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion) {
+        return new Promise((resolve, reject) => {
+            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsWu8fnt8s1_diZT4sg3SCoVzGDa_EozhAiYNvWNiO9v_h3xFbFAFh9LvMgKvv9lUdtQ/exec';
+            
+            // Create a temporary form to submit data
+            const form = document.createElement('form');
+            form.action = APPS_SCRIPT_URL;
+            form.method = 'POST';
+            form.style.display = 'none';
+            
+            // Add form fields
+            const fields = {
+                name: name || 'Anonymous',
+                firstChoice: firstChoice || '',
+                secondChoice: secondChoice || '',
+                thirdChoice: thirdChoice || '',
+                suggestion: suggestion || ''
+            };
+            
+            Object.keys(fields).forEach(key => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = fields[key];
+                form.appendChild(input);
+            });
+            
+            // Create hidden iframe to submit form
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.name = 'submitFrame';
+            form.target = 'submitFrame';
+            
+            document.body.appendChild(iframe);
+            document.body.appendChild(form);
+            
+            // Handle completion
+            iframe.onload = () => {
+                console.log('Data submitted to Google Sheets');
+                document.body.removeChild(iframe);
+                document.body.removeChild(form);
+                resolve('success');
+            };
+            
+            iframe.onerror = () => {
+                console.error('Error submitting to Google Sheets');
+                document.body.removeChild(iframe);
+                document.body.removeChild(form);
+                reject(new Error('Failed to submit to Google Sheets'));
+            };
+            
+            // Submit the form
+            setTimeout(() => {
+                form.submit();
+            }, 100);
         });
-        
-        console.log('Apps Script response status:', response.status);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Apps Script error:', response.status, errorText);
-            throw new Error(`Apps Script error: ${response.status} - ${errorText}`);
-        }
-        
-        const result = await response.text();
-        console.log('Apps Script success:', result);
-        return result;
     }
 
     // Toast notification system
