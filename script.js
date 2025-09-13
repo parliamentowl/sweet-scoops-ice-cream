@@ -97,7 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch((error) => {
                 console.error('Error submitting vote:', error);
-                showToast('Vote saved locally, but could not sync to server', 'warning');
+                console.error('Full error details:', error.message);
+                showToast('Vote saved locally, but could not sync to server: ' + error.message, 'warning');
                 
                 // Still update local storage as fallback
                 const votes = JSON.parse(localStorage.getItem('iceCreamRankedVotes') || '{}');
@@ -114,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Google Apps Script integration
     async function submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion) {
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDZkQrMzgvxl6QSUD7ZKgwM-pL4wQF-Kd0z0zMPce6JG-xkcbACfMSvotFvuy4tphfrQ/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsWu8fnt8s1_diZT4sg3SCoVzGDa_EozhAiYNvWNiO9v_h3xFbFAFh9LvMgKvv9lUdtQ/exec';
         
         const data = {
             name: name || 'Anonymous',
