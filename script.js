@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Google Apps Script integration using form submission method
     function submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion) {
         return new Promise((resolve, reject) => {
-            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsWu8fnt8s1_diZT4sg3SCoVzGDa_EozhAiYNvWNiO9v_h3xFbFAFh9LvMgKvv9lUdtQ/exec';
+            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmn4ouNAyVbGiIgKlSxmui6vS4RNCCWWvHmteJT1wt3sKXbMSz4JJKCBvFS_DkxnKvTg/exec';
             
             // Create a temporary form to submit data
             const form = document.createElement('form');
