@@ -112,46 +112,38 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
 
-    // Google Sheets integration
+    // Google Apps Script integration
     async function submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion) {
-        const SHEET_ID = '1jMl6RoJsN03UI_F1YAZHKpT9TV5V2Z8Cod0mUbOImcc';
-        const API_KEY = 'AIzaSyCXhIbkLSsrug6Xloo4GkcXvREn45NJ9Lw';
-        const RANGE = 'Sheet1!A:F'; // Covers columns A through F
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDZkQrMzgvxl6QSUD7ZKgwM-pL4wQF-Kd0z0zMPce6JG-xkcbACfMSvotFvuy4tphfrQ/exec';
         
-        const timestamp = new Date().toISOString();
-        const values = [[
-            timestamp,
-            name || 'Anonymous',
-            firstChoice || '',
-            secondChoice || '',
-            thirdChoice || '',
-            suggestion || ''
-        ]];
+        const data = {
+            name: name || 'Anonymous',
+            firstChoice: firstChoice || '',
+            secondChoice: secondChoice || '',
+            thirdChoice: thirdChoice || '',
+            suggestion: suggestion || ''
+        };
         
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+        console.log('Submitting to Apps Script:', data);
         
-        console.log('Submitting to Google Sheets:', { url, values });
-        
-        const response = await fetch(url, {
+        const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                values: values
-            })
+            body: JSON.stringify(data)
         });
         
-        console.log('Google Sheets response status:', response.status);
+        console.log('Apps Script response status:', response.status);
         
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Google Sheets API error:', response.status, errorText);
-            throw new Error(`Google Sheets API error: ${response.status} - ${errorText}`);
+            console.error('Apps Script error:', response.status, errorText);
+            throw new Error(`Apps Script error: ${response.status} - ${errorText}`);
         }
         
-        const result = await response.json();
-        console.log('Google Sheets success:', result);
+        const result = await response.text();
+        console.log('Apps Script success:', result);
         return result;
     }
 
