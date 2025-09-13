@@ -67,33 +67,23 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Disable submit button to prevent double submissions
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Submitting...';
+        
         // Submit to Google Sheets and fetch real-time results
         submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion)
-            .then((response) => {
-                // Parse the response to get real-time results
-                try {
-                    const data = JSON.parse(response);
-                    if (data.success && data.results) {
-                        // Show success message
-                        surveyForm.style.display = 'none';
-                        surveyResults.style.display = 'block';
-                        
-                        // Display real-time results from Google Sheets
-                        updateVoteResults(data.results);
-                        
-                        showToast('Thank you for your ranked vote!', 'success');
-                    } else {
-                        throw new Error('Invalid response format');
-                    }
-                } catch (parseError) {
-                    console.error('Error parsing response:', parseError);
-                    // Fallback: fetch results separately
-                    fetchAndDisplayResults();
-                }
+            .then(() => {
+                // Always fetch results separately for reliability
+                return fetchAndDisplayResults();
             })
             .catch((error) => {
                 console.error('Error submitting vote:', error);
                 showToast('Error submitting vote: ' + error.message, 'error');
+                // Re-enable button on error
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit Vote';
             });
     });
 
@@ -134,18 +124,38 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.appendChild(iframe);
             document.body.appendChild(form);
             
-            // Handle completion
+            // Handle completion with timeout
+            let resolved = false;
+            
+            const cleanup = () => {
+                if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                if (document.body.contains(form)) document.body.removeChild(form);
+            };
+            
             iframe.onload = () => {
-                document.body.removeChild(iframe);
-                document.body.removeChild(form);
-                resolve('success');
+                if (!resolved) {
+                    resolved = true;
+                    cleanup();
+                    resolve('success');
+                }
             };
             
             iframe.onerror = () => {
-                document.body.removeChild(iframe);
-                document.body.removeChild(form);
-                reject(new Error('Failed to submit to Google Sheets'));
+                if (!resolved) {
+                    resolved = true;
+                    cleanup();
+                    reject(new Error('Failed to submit to Google Sheets'));
+                }
             };
+            
+            // Auto-resolve after 3 seconds (Apps Script usually responds quickly)
+            setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    cleanup();
+                    resolve('success');
+                }
+            }, 3000);
             
             // Submit the form
             setTimeout(() => {
