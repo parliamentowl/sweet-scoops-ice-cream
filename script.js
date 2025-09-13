@@ -152,14 +152,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Handle completion
             iframe.onload = () => {
-                console.log('Data submitted to Google Sheets');
                 document.body.removeChild(iframe);
                 document.body.removeChild(form);
                 resolve('success');
             };
             
             iframe.onerror = () => {
-                console.error('Error submitting to Google Sheets');
                 document.body.removeChild(iframe);
                 document.body.removeChild(form);
                 reject(new Error('Failed to submit to Google Sheets'));
