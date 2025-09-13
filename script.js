@@ -67,56 +67,40 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Submit to Google Sheets and update local storage
+        // Submit to Google Sheets and fetch real-time results
         submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion)
-            .then(() => {
-                // Also store locally for immediate display
-                const votes = JSON.parse(localStorage.getItem('iceCreamRankedVotes') || '{}');
-                
-                // Weighted scoring: 1st choice = 3 points, 2nd choice = 2 points, 3rd choice = 1 point
-                if (firstChoice) {
-                    votes[firstChoice] = (votes[firstChoice] || 0) + 3;
+            .then((response) => {
+                // Parse the response to get real-time results
+                try {
+                    const data = JSON.parse(response);
+                    if (data.success && data.results) {
+                        // Show success message
+                        surveyForm.style.display = 'none';
+                        surveyResults.style.display = 'block';
+                        
+                        // Display real-time results from Google Sheets
+                        updateVoteResults(data.results);
+                        
+                        showToast('Thank you for your ranked vote!', 'success');
+                    } else {
+                        throw new Error('Invalid response format');
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing response:', parseError);
+                    // Fallback: fetch results separately
+                    fetchAndDisplayResults();
                 }
-                if (secondChoice) {
-                    votes[secondChoice] = (votes[secondChoice] || 0) + 2;
-                }
-                if (thirdChoice) {
-                    votes[thirdChoice] = (votes[thirdChoice] || 0) + 1;
-                }
-                
-                localStorage.setItem('iceCreamRankedVotes', JSON.stringify(votes));
-                
-                // Show success message
-                surveyForm.style.display = 'none';
-                surveyResults.style.display = 'block';
-                
-                // Update results display
-                updateVoteResults(votes);
-                
-                showToast('Thank you for your ranked vote!', 'success');
             })
             .catch((error) => {
                 console.error('Error submitting vote:', error);
-                console.error('Full error details:', error.message);
-                showToast('Vote saved locally, but could not sync to server: ' + error.message, 'warning');
-                
-                // Still update local storage as fallback
-                const votes = JSON.parse(localStorage.getItem('iceCreamRankedVotes') || '{}');
-                if (firstChoice) votes[firstChoice] = (votes[firstChoice] || 0) + 3;
-                if (secondChoice) votes[secondChoice] = (votes[secondChoice] || 0) + 2;
-                if (thirdChoice) votes[thirdChoice] = (votes[thirdChoice] || 0) + 1;
-                localStorage.setItem('iceCreamRankedVotes', JSON.stringify(votes));
-                
-                surveyForm.style.display = 'none';
-                surveyResults.style.display = 'block';
-                updateVoteResults(votes);
+                showToast('Error submitting vote: ' + error.message, 'error');
             });
     });
 
     // Google Apps Script integration using form submission method
     function submitToGoogleSheets(name, firstChoice, secondChoice, thirdChoice, suggestion) {
         return new Promise((resolve, reject) => {
-            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmn4ouNAyVbGiIgKlSxmui6vS4RNCCWWvHmteJT1wt3sKXbMSz4JJKCBvFS_DkxnKvTg/exec';
+            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyHDur20Pb4kDKU9K_trfnUWgfifEUzhzlNicXSL-Zq6VBdRRMDNoi-ORXQR0z2Tstag/exec';
             
             // Create a temporary form to submit data
             const form = document.createElement('form');
@@ -168,6 +152,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 form.submit();
             }, 100);
         });
+    }
+
+    // Fetch results from Google Sheets (fallback function)
+    async function fetchAndDisplayResults() {
+        try {
+            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyHDur20Pb4kDKU9K_trfnUWgfifEUzhzlNicXSL-Zq6VBdRRMDNoi-ORXQR0z2Tstag/exec';
+            
+            const response = await fetch(APPS_SCRIPT_URL + '?action=getResults', {
+                method: 'GET',
+                mode: 'cors'
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.results) {
+                surveyForm.style.display = 'none';
+                surveyResults.style.display = 'block';
+                updateVoteResults(data.results);
+                showToast('Thank you for your ranked vote!', 'success');
+            } else {
+                throw new Error('Could not load results');
+            }
+        } catch (error) {
+            console.error('Error fetching results:', error);
+            surveyForm.style.display = 'none';
+            surveyResults.style.display = 'block';
+            document.getElementById('results-display').innerHTML = '<p>Vote submitted successfully! Results will be updated soon.</p>';
+            showToast('Thank you for your ranked vote!', 'success');
+        }
     }
 
     // Toast notification system
@@ -231,18 +244,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Update vote results display
-    function updateVoteResults(votes) {
+    function updateVoteResults(results) {
         const resultsDisplay = document.getElementById('results-display');
         
-        // Sort flavors by points (vote count in our weighted system)
-        const sortedVotes = Object.entries(votes).sort((a, b) => b[1] - a[1]);
-        
+        // Results comes as array from Google Sheets: [{flavor: 'name', points: 123}, ...]
         let resultsHTML = '<div class="vote-results">';
         
-        sortedVotes.slice(0, 6).forEach(([flavor, points], index) => {
-            const totalPoints = Object.values(votes).reduce((a, b) => a + b, 0);
-            const percentage = Math.round((points / totalPoints) * 100);
-            const emoji = getFlavorEmoji(flavor);
+        // Calculate total points for percentages
+        const totalPoints = results.reduce((sum, item) => sum + item.points, 0);
+        
+        results.slice(0, 6).forEach((item, index) => {
+            const percentage = totalPoints > 0 ? Math.round((item.points / totalPoints) * 100) : 0;
+            const emoji = getFlavorEmoji(item.flavor);
             
             const rankEmojis = ['🥇', '🥈', '🥉'];
             const rankEmoji = index < 3 ? rankEmojis[index] : `#${index + 1}`;
@@ -251,8 +264,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="result-item">
                     <div class="result-header">
                         <span class="rank">${rankEmoji}</span>
-                        <span class="flavor">${emoji} ${flavor}</span>
-                        <span class="points">${points} points</span>
+                        <span class="flavor">${emoji} ${item.flavor}</span>
+                        <span class="points">${item.points} points</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress" style="width: ${percentage}%"></div>
@@ -323,10 +336,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const emojiMap = {
             // Normal Flavors
             'Strawberry Buttermilk': '🍓',
-            'Sweet Cream & Blackberry Jam': '🫒',
+            'Sweet Cream & Blackberry Jam': '🍦',
             'Mint Fudge Brownie': '🍃',
             'Salted Caramel': '🍯',
-            'Salty Vanilla': '🍦',
+            'Death by Vanilla': '🍦',
             // Unusual Flavors
             'Spruce Tips': '🌲',
             'Parmesan': '🧀',
