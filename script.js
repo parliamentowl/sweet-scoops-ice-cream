@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 surveyForm.style.display = 'none';
                 surveyResults.style.display = 'block';
                 updateVoteResults(data.results);
-                showToast('Thank you for your ranked vote!', 'success');
+                showToast('Thanks for your input!', 'success');
             } else {
                 throw new Error('Could not load results');
             }
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
             surveyForm.style.display = 'none';
             surveyResults.style.display = 'block';
             document.getElementById('results-display').innerHTML = '<p>Vote submitted successfully! Results will be updated soon.</p>';
-            showToast('Thank you for your ranked vote!', 'success');
+            showToast('Thanks for your input!', 'success');
         }
     }
 
